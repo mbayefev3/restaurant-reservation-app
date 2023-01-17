@@ -6,8 +6,13 @@ const moment = require("moment")
 
 const asyncErrorBoundary = require("../errors/asyncErrorBound")
 async function list(req, res) {
+
+  const { date: defaultDate, reservationDate } = req.query
+
+  const searchByDate = defaultDate || reservationDate
+  const reservations = await service.list(searchByDate)
   res.json({
-    data: [],
+    data: reservations,
   });
 }
 
@@ -145,7 +150,8 @@ async function create(req, res) {
 }
 
 
+
 module.exports = {
-  list,
+  list: asyncErrorBoundary(list),
   create: [dataExists, FirstNameExists, lastNameExists, mobilePhoneExists, reservationDateExists, reservationTimeExists, peopleExists, asyncErrorBoundary(create)]
 };

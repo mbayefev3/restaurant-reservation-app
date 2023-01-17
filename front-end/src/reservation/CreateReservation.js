@@ -48,9 +48,12 @@ const CreateReservation = () => {
                 }),
             })
             const { data } = await response.json()
-            console.log('data', data)
+
+            history.push(`/dashboard?date=${formData.reservation_date}`)
+            // console.log('data', data)
 
         } catch (err) {
+
 
         }
 

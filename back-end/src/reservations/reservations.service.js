@@ -7,6 +7,14 @@ async function create(reservation) {
 }
 
 
+async function list(date) {
+    console.log('reservation', date)
+
+
+    const reservations = await db("reservations").select("*").where({ reservation_date: date }).orderBy('reservation_time', 'desc')
+    return reservations
+}
 module.exports = {
-    create
+    create,
+    list
 }
