@@ -35,6 +35,7 @@ describe("US-01 - Create and list reservations - E2E", () => {
     test("filling and submitting form creates a new reservation and then displays the dashboard for the reservation date", async () => {
       const lastName = Date.now().toString(10);
 
+      console.log(1)
       await page.type("input[name=first_name]", "James");
       await page.type("input[name=last_name]", lastName);
       await page.type("input[name=mobile_number]", "800-555-1212");
@@ -47,6 +48,8 @@ describe("US-01 - Create and list reservations - E2E", () => {
         fullPage: true,
       });
 
+      console.log(2)
+
       await Promise.all([
         page.click("[type=submit]"),
         page.waitForNavigation({ waitUntil: "networkidle0" }),
@@ -56,7 +59,7 @@ describe("US-01 - Create and list reservations - E2E", () => {
         path: ".screenshots/us-01-submit-after.png",
         fullPage: true,
       });
-
+      console.log(3)
       await expect(page).toMatch(lastName);
     });
 
