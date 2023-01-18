@@ -26,6 +26,7 @@ function Dashboard({ date }) {
 
     if (reservationDate) {
 
+      console.log('reservations', reservationDate)
       listReservations({ reservationDate }, abortController.signal)
         .then(setReservations)
         .catch(setReservationsError);
@@ -38,6 +39,7 @@ function Dashboard({ date }) {
     }
     return () => abortController.abort();
   }
+  console.log('daaa', reservations)
 
   return (
     <main>

@@ -12,6 +12,7 @@ async function list(date) {
 
 
     const reservations = await db("reservations").select("*").where({ reservation_date: date }).orderBy('reservation_time', 'asc')
+    console.log('resss', reservations)
     return reservations
 }
 module.exports = {

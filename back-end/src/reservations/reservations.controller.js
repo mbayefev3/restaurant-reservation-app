@@ -118,14 +118,23 @@ function reservationTimeExists(req, res, next) {
 function peopleExists(req, res, next) {
 
   const { data: { people } = {} } = req.body
+  console.log('peopleString', typeof people)
 
-  // console.log('people', people)
-  if (!people || !Number.isInteger(people)) {
+  if (people && typeof people === "string") {
+    return next({
+      status: 400,
+      message: "people is string"
+    })
+  }
+
+  if (!people) {
     return next({
       status: 400,
       message: "people is missing"
     })
   }
+  console.log('people', people)
+
   next()
 
 }

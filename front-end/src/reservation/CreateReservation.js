@@ -25,7 +25,7 @@ const CreateReservation = () => {
         setFormData((formData) => {
             return {
                 ...formData,
-                [target.name]: target.value
+                [target.name]: target.name === "people" ? Number(target.value) : target.value
             }
         })
     }
