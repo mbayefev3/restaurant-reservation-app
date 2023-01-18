@@ -120,7 +120,7 @@ function peopleExists(req, res, next) {
   const { data: { people } = {} } = req.body
 
   // console.log('people', people)
-  if (!people) {
+  if (!people || !Number.isInteger(people)) {
     return next({
       status: 400,
       message: "people is missing"

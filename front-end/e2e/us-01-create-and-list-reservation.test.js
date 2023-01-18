@@ -68,7 +68,7 @@ describe("US-01 - Create and list reservations - E2E", () => {
       await page.goto(`${baseURL}/reservations/new`, {
         waitUntil: "networkidle0",
       });
-
+      console.log(4)
       const [cancelButton] = await page.$x(
         "//button[contains(translate(., 'ACDEFGHIJKLMNOPQRSTUVWXYZ', 'acdefghijklmnopqrstuvwxyz'), 'cancel')]"
       );
