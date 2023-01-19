@@ -8,7 +8,7 @@ async function create(reservation) {
 
 
 async function list(date) {
-    console.log('reservation', date)
+    console.log('reservationfsdfsf', date)
 
 
     const reservations = await db("reservations").select("*").where({ reservation_date: date }).orderBy('reservation_time', 'asc')

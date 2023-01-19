@@ -48,7 +48,6 @@ describe("US-01 - Create and list reservations - E2E", () => {
         fullPage: true,
       });
 
-      console.log(2)
 
       await Promise.all([
         page.click("[type=submit]"),
@@ -59,7 +58,6 @@ describe("US-01 - Create and list reservations - E2E", () => {
         path: ".screenshots/us-01-submit-after.png",
         fullPage: true,
       });
-      console.log(3)
       await expect(page).toMatch(lastName);
     });
 
@@ -68,7 +66,6 @@ describe("US-01 - Create and list reservations - E2E", () => {
       await page.goto(`${baseURL}/reservations/new`, {
         waitUntil: "networkidle0",
       });
-      console.log(4)
       const [cancelButton] = await page.$x(
         "//button[contains(translate(., 'ACDEFGHIJKLMNOPQRSTUVWXYZ', 'acdefghijklmnopqrstuvwxyz'), 'cancel')]"
       );
