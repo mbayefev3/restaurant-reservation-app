@@ -11,6 +11,7 @@ async function list(req, res) {
 
   const searchByDate = defaultDate || reservationDate
   const reservations = await service.list(searchByDate)
+
   res.json({
     data: reservations,
   });
@@ -29,6 +30,35 @@ function dataExists(req, res, next) {
 
   next()
 }
+
+
+function validDays(req, res, next) {
+
+  const { data: { reservation_date } = {} } = req.body
+  const date = moment(reservation_date, "YYYY-MM-DD").format('dddd')
+  const todayDate = moment(reservation_date, "YYYY-MM-DD").isBefore(moment().format("YYYY-MM-DD"))
+
+  if (date === "Tuesday") {
+    return next({
+      status: 400,
+      message: "The reservation date is a Tuesday as the restaurant is closed on Tuesdays."
+    })
+  }
+
+  if (todayDate) {
+    return next({
+      status: 400,
+      message: "The reservation date is in the past. Only future reservations are allowed."
+    })
+  }
+
+  next()
+  // The /reservations API will have the same validations as above and will return 400,
+  //  along with an informative error message, when a validation error happens.
+
+}
+
+
 
 function FirstNameExists(req, res, next) {
   const { data: { first_name } = {} } = req.body
@@ -141,7 +171,6 @@ function peopleExists(req, res, next) {
 
 async function create(req, res) {
 
-  console.log('adsadasdsad', req.body.data)
   req.body.data.people = Number(req.body.data.people)
 
   // console.log('datadd', req.body.data.people)
@@ -162,5 +191,5 @@ async function create(req, res) {
 
 module.exports = {
   list: asyncErrorBoundary(list),
-  create: [dataExists, FirstNameExists, lastNameExists, mobilePhoneExists, reservationDateExists, reservationTimeExists, peopleExists, asyncErrorBoundary(create)]
+  create: [dataExists, FirstNameExists, lastNameExists, mobilePhoneExists, reservationDateExists, validDays, reservationTimeExists, peopleExists, asyncErrorBoundary(create)]
 };

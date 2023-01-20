@@ -6,6 +6,7 @@ import formatReservationDate from "../utils/format-reservation-date";
 import { next, today, previous } from "../utils/date-time";
 import ReservationCards from "./ReservationCards";
 import ToggleButtons from "./ToggleButtons";
+import Loader from "../Loader";
 /**
  * Defines the dashboard page.
  * @param date
@@ -47,7 +48,6 @@ function Dashboard() {
 
     const date = changeDate
 
-    console.log('date', date)
     listReservations({ date }, abortController.signal)
       .then(setReservations)
       .catch(setReservationsError);
@@ -61,18 +61,26 @@ function Dashboard() {
 
 
 
-  function handleNextDate() {
 
+  function handleNextDate() {
     setChangeDate((changeDate) => next(changeDate))
   }
 
   function handleTodayDate() {
+
     setChangeDate((changeDate) => today())
   }
 
   function handlePreviousDate() {
+
     setChangeDate((changeDate) => previous(changeDate))
   }
+
+
+
+
+
+
 
   return (
     <main>
@@ -80,14 +88,17 @@ function Dashboard() {
       <div className="d-md-flex mb-3">
         <h4 className="mb-0">Reservations for date</h4>
       </div>
-      <ErrorAlert error={reservationsError} />
-      {/* {reservations.length && <ReservationCards reservations={reservations} />}
-      {reservations.length && <ToggleButtons handleNextDate={handleNextDate} />} */}
+      {reservationsError && <ErrorAlert error={reservationsError} />}
 
-      <ReservationCards reservations={reservations} />
-      <ToggleButtons handleNextDate={handleNextDate}
-        handlePreviousDate={handlePreviousDate}
-        handleTodayDate={handleTodayDate} />
+      <div>
+
+        <ReservationCards reservations={reservations} />
+
+
+        <ToggleButtons handleNextDate={handleNextDate}
+          handlePreviousDate={handlePreviousDate}
+          handleTodayDate={handleTodayDate} />
+      </div>
 
     </main>
   );
