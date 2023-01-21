@@ -22,6 +22,7 @@ function Dashboard() {
   const [reservationsError, setReservationsError] = useState(null);
 
   const [changeDate, setChangeDate] = useState(reservationDate)
+  const [notAvailable, setNotAvailable] = useState("")
 
   useEffect(loadDashboard, []);
 
@@ -29,35 +30,57 @@ function Dashboard() {
 
 
 
-  function loadDashboard() {
+  async function loadDashboard() {
     const abortController = new AbortController();
-
+    setNotAvailable("")
     setReservationsError(null);
 
-    listReservations({ reservationDate }, abortController.signal)
-      .then(setReservations)
-      .catch(setReservationsError);
+    try {
+      const reservationsData = await listReservations({ reservationDate }, abortController.signal)
+      const retrievedReservations = await reservationsData
+
+      if (retrievedReservations.length) {
+        setReservations(retrievedReservations)
+      } else {
+
+        setNotAvailable(`No reservation is picked for this date ${changeDate}`)
+      }
+
+    } catch (err) {
+      setReservationsError(err)
+    }
+
 
     return () => abortController.abort();
   }
 
-  function loadChangeDate() {
+  async function loadChangeDate() {
     const abortController = new AbortController();
     setReservationsError(null)
     setReservations([])
+    setNotAvailable("")
 
-    const date = changeDate
+    try {
+      const date = changeDate
+      const reservationsDate = await listReservations({ date }, abortController.signal)
+      const retrievedReservations = await reservationsDate
 
-    listReservations({ date }, abortController.signal)
-      .then(setReservations)
-      .catch(setReservationsError);
+      if (retrievedReservations.length) {
+        setReservations(retrievedReservations)
+      } else {
+
+        setNotAvailable(`No reservation is picked for this ${changeDate}`)
+      }
+
+    } catch (err) {
+
+      setReservationsError(err)
+    }
 
     return () => abortController.abort();
 
 
   }
-
-
 
 
 
@@ -80,7 +103,7 @@ function Dashboard() {
 
 
 
-
+  console.log('reservations', reservations, notAvailable)
 
   return (
     <main>
@@ -92,9 +115,10 @@ function Dashboard() {
 
       <div>
 
-        <ReservationCards reservations={reservations} />
-
-
+        {reservations.length ? <ReservationCards reservations={reservations} />
+          : ""}
+        {!reservations.length && !notAvailable ? <Loader /> : ""}
+        {notAvailable && !reservations.length ? notAvailable : ""}
         <ToggleButtons handleNextDate={handleNextDate}
           handlePreviousDate={handlePreviousDate}
           handleTodayDate={handleTodayDate} />

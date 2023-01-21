@@ -3,6 +3,7 @@ import { useHistory } from "react-router-dom"
 import React, { useState } from "react"
 import { today } from "../utils/date-time"
 import moment from "moment"
+import Alert from "./Alert"
 function CreateReservation() {
 
     const history = useHistory()
@@ -17,48 +18,42 @@ function CreateReservation() {
     const [error, setError] = useState([])
 
 
-    // 2023-01-17
-
-
     function handleChange({ target }) {
 
         setError([])
 
-        // if (target.name === 'reservation_date' && moment(target.value, "MM-DD-YYYY").format('dddd') === "Tuesday") {
-
-        //     setError("Closed on Tuesdays")
-        // } else {
         setFormData((formData) => {
             return {
                 ...formData,
                 [target.name]: target.name === "people" ? Number(target.value) : target.value
             }
         })
-        // }
 
     }
 
 
-    // const todayDate = moment("2023-01-18", "YYYY-MM-DD").isBefore(today())
 
-    // console.log("today", todayDate, today())
     const handleFormSubmit = async (e) => {
 
         e.preventDefault()
 
+        setError([])
 
 
         const { reservation_date } = formData
-        const date = moment(reservation_date, "YYYY-MM-DD").format('dddd')
+        const reservationDate = moment(reservation_date, "YYYY-MM-DD").format('dddd') //this gives us the day
         const todayDate = moment(reservation_date, "YYYY-MM-DD").isBefore(today())
 
         if (todayDate) {
             setError((error) => error.concat("The reservation date is in the past. Only future reservations are allowed."))
         }
-        if (date === "Tuesday") {
+        if (reservationDate === "Tuesday") {
             setError((error) => error.concat("The reservation date is a Tuesday as the restaurant is closed on Tuesdays."))
 
-        } else {
+        }
+
+
+        if (!todayDate && reservationDate !== "Tuesday") {
             try {
 
                 const response = await fetch('http://localhost:5001/reservations', {
@@ -87,20 +82,7 @@ function CreateReservation() {
 
 
 
-
-
-    // The /reservations/new page will display an error message with className="alert alert-danger" if any of the following constraints are violated:
-    // The reservation date is a Tuesday as the restaurant is closed on Tuesdays.
-    // The reservation date is in the past. Only future reservations are allowed.
-
-
-
-
-
-
-
-
-    //press prevent negative value from being entered
+    //press func prevent negative value from being entered
     const press = (event) => event.charCode != 8 && event.charCode == 0 || (event.charCode >= 48 && event.charCode <= 57)
 
 
@@ -155,9 +137,9 @@ function CreateReservation() {
                 <button type="button" className="btn btn-primary" onClick={() => history.goBack()}>Cancel</button>
 
             </form>
-            <div className="alert alert-danger">{
-                error.map((err, i) => <p key={i}>{err}</p>)
-            }</div>
+
+            <Alert error={error} />
+
         </>
     )
 

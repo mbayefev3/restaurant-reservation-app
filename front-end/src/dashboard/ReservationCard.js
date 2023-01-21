@@ -8,7 +8,7 @@ const ReservationCard = ({ reservation: { first_name, last_name, mobile_number, 
 
         <div className="card" style={{ width: "18rem" }}>
             <div className="card-header">
-                <p>Reservation_id {reservation_id}</p>
+                <p>Reservation Number: {reservation_id}</p>
             </div>
             <ul className="list-group list-group-flush">
                 <li className="list-group-item">FirstName: {first_name}</li>
