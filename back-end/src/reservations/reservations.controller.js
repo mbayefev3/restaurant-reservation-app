@@ -3,7 +3,7 @@
  */
 const service = require("./reservations.service")
 const moment = require("moment")
-
+const convertPhoneNumberWithDash = require("../utils/convertPhoneNumber")
 const asyncErrorBoundary = require("../errors/asyncErrorBound")
 async function list(req, res) {
 
@@ -17,6 +17,31 @@ async function list(req, res) {
   });
 }
 
+
+// function validTimes(req, res, next) {
+
+//   const { data: { reservation_time } = {} } = req.body
+
+//   const openTime = moment("10:30", "HH:mm")
+//   const beforeClosedTime = moment("21:30", "HH:mm")
+//   const reservationTime = moment(reservation_time, "HH:mm")
+
+//   const reservedBeforeOpen = reservationTime.isBefore(openTime)
+//   const reservedWhenOpen = reservationTime.isAfter(beforeClosedTime)
+//   const validReservationTime = reservationTime.isBetween(openTime, beforeClosedTime)
+
+//   if (!validReservationTime) {
+//     return next({
+//       status: 400,
+//       message: "please choose a different time between 10H31am to 9:29pm"
+//     })
+
+//     next()
+//   }
+
+
+
+// }
 function dataExists(req, res, next) {
 
   const { data } = req.body
@@ -94,7 +119,28 @@ function mobilePhoneExists(req, res, next) {
       message: "mobile_number is missing"
     })
   }
-  next()
+
+  if (mobile_number.length === 10 && !mobile_number.includes("-")) {
+
+    return next()
+  }
+
+  if (mobile_number.length < 10) {
+    return next({
+      status: 400,
+      message: "wrong mobile number format"
+    })
+  }
+  if (mobile_number.includes("-") && mobile_number.length !== 12) {
+    return next({
+      status: 400,
+      message: "wrong mobile number format"
+    })
+  }
+
+  if (mobile_number.includes("-") && mobile_number.length === 12) {
+    return next()
+  }
 }
 
 function reservationDateExists(req, res, next) {
@@ -163,13 +209,55 @@ function peopleExists(req, res, next) {
       message: "people is missing"
     })
   }
-  console.log('people', people)
 
   next()
 
 }
 
+
+
+function validTimes(req, res, next) {
+
+  const { data: { reservation_time } = {} } = req.body
+
+
+
+  const openTime = moment("10:30", "HH:mm")
+  const beforeClosedTime = moment("21:30", "HH:mm")
+  const reservationTime = moment(reservation_time, "HH:mm") //24h
+
+
+
+
+  const validReservationTime = reservationTime.isBetween(openTime, beforeClosedTime)
+
+  if (validReservationTime) {
+    return next()
+  }
+
+
+  next({
+    status: 400,
+    message: "the reservation_time is not in the range when the restaurant is operational"
+  })
+
+
+
+
+
+
+}
+
+
+
 async function create(req, res) {
+
+  const { data: { mobile_number } = {} } = req.body
+
+  if (!mobile_number.includes("-")) {
+    req.body.data.mobile_number = convertPhoneNumberWithDash(req.body.data.mobile_number)
+  }
+
 
   req.body.data.people = Number(req.body.data.people)
 
@@ -191,5 +279,5 @@ async function create(req, res) {
 
 module.exports = {
   list: asyncErrorBoundary(list),
-  create: [dataExists, FirstNameExists, lastNameExists, mobilePhoneExists, reservationDateExists, validDays, reservationTimeExists, peopleExists, asyncErrorBoundary(create)]
+  create: [dataExists, FirstNameExists, lastNameExists, mobilePhoneExists, validTimes, reservationDateExists, validDays, reservationTimeExists, peopleExists, asyncErrorBoundary(create)]
 };

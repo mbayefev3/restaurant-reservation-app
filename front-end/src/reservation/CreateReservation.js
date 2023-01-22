@@ -35,15 +35,38 @@ function CreateReservation() {
 
     const handleFormSubmit = async (e) => {
 
+        console.log('form', formData)
+
         e.preventDefault()
 
         setError([])
+        // The reservation time is after 9:30 PM, because the 
+        // restaurant closes at 10:30 PM and the customer needs to have time to enjoy their meal.
+
+        const { reservation_date, reservation_time } = formData
+        const reservationTime = moment(reservation_time, "HH:mm") //24h
+        const openTime = moment("10:30", "HH:mm")
+        const beforeClosedTime = moment("21:30", "HH:mm")
+        const reservedBeforeOpen = reservationTime.isBefore(openTime)
+        const reservedWhenOpen = reservationTime.isAfter(beforeClosedTime)
 
 
-        const { reservation_date } = formData
+
+        //         var time = moment('09:34:00',format),
+        //   beforeTime = moment('08:34:00', format),
+        //   afterTime = moment('10:34:00', format);
+        const validReservationTime = reservationTime.isBetween(openTime, beforeClosedTime)
+        // if (time.isBetween(beforeTime, afterTime)) {
+
+
+
+
         const reservationDate = moment(reservation_date, "YYYY-MM-DD").format('dddd') //this gives us the day
         const todayDate = moment(reservation_date, "YYYY-MM-DD").isBefore(today())
 
+        if (!validReservationTime) {
+            setError((error) => error.concat("no available time to reserved."))
+        }
         if (todayDate) {
             setError((error) => error.concat("The reservation date is in the past. Only future reservations are allowed."))
         }
@@ -53,7 +76,8 @@ function CreateReservation() {
         }
 
 
-        if (!todayDate && reservationDate !== "Tuesday") {
+        if (!todayDate && reservationDate !== "Tuesday" && validReservationTime) {
+            console.log('hello yea')
             try {
 
                 const response = await fetch('http://localhost:5001/reservations', {
@@ -66,6 +90,8 @@ function CreateReservation() {
                     }),
                 })
                 const { data, error } = await response.json()
+
+                // console.log('errrorrr', error,data)
 
                 if (error) {
                     throw error
@@ -105,7 +131,7 @@ function CreateReservation() {
                 <div className="mb-3">
                     <label htmlFor="mobile_number" className="form-label">Mobile number:</label>
                     <input type="tel" className="form-control" id="mobile_number" aria-describedby="emailHelp" name="mobile_number" required
-                        pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="800-555-1212"
+                        // pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="800-555-1212"
                         value={formData.mobile_number}
                         onChange={handleChange} />
                 </div>
