@@ -103,7 +103,6 @@ function Dashboard() {
 
 
 
-  console.log('reservations', reservations, notAvailable)
 
   return (
     <main>

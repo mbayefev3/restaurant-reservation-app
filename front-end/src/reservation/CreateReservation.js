@@ -1,9 +1,8 @@
-
 import { useHistory } from "react-router-dom"
 import React, { useState } from "react"
 import { today } from "../utils/date-time"
 import moment from "moment"
-import Alert from "./Alert"
+import Alert from "../Alert"
 function CreateReservation() {
 
     const history = useHistory()

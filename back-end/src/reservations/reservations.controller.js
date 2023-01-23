@@ -141,6 +141,11 @@ function mobilePhoneExists(req, res, next) {
   if (mobile_number.includes("-") && mobile_number.length === 12) {
     return next()
   }
+
+  next({
+    status: 400,
+    message: "please check the entered mobile number"
+  })
 }
 
 function reservationDateExists(req, res, next) {

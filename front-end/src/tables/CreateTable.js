@@ -1,7 +1,7 @@
 import React from "react"
 import { useHistory } from "react-router"
 import { useState } from "react"
-
+import Alert from "../Alert"
 // The /tables/new page will
 
 // have the following required and not-nullable fields:
@@ -24,9 +24,11 @@ function CreateTable() {
         capacity: ""
     })
 
+    const [errors, setErrors] = useState([])
 
     function handleChange({ target }) {
 
+        setErrors([])
         setFormData((formData) => {
 
             return {
@@ -36,10 +38,32 @@ function CreateTable() {
         })
     }
 
-    function handleFormSubmit(e) {
+    async function handleFormSubmit(e) {
         e.preventDefault()
 
-        console.log('form', formData)
+        try {
+            const response = await fetch("http://localhost:5001/tables", {
+
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    data: formData
+                }),
+            })
+
+            const { data, error } = await response.json()
+
+            console.log("datatatat", data)
+            if (error) {
+                throw error
+            }
+
+            history.push("/dashboard")
+        } catch (err) {
+            setErrors((errors) => errors.concat(err))
+        }
     }
     return (
         <>
@@ -57,11 +81,11 @@ function CreateTable() {
                 <div className="mb-3">
                     <label htmlFor="capacity" className="form-label">Capacity:</label>
                     <input type="number" className="form-control" id="capacity" required
-                        min="1"
+
                         name="capacity"
                         value={formData.capacity}
                         onChange={handleChange}
-
+                        min="1"
                     />
                 </div>
 
@@ -70,7 +94,7 @@ function CreateTable() {
 
             </form>
 
-
+            <Alert error={errors} />
         </>
     )
 
