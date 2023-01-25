@@ -1,5 +1,4 @@
 const knex = require("../db/connection")
-const db = require("../db/connection")
 
 async function create(table) {
 
@@ -8,6 +7,35 @@ async function create(table) {
 }
 
 
+async function list() {
+    return knex("tables").select("*").orderBy('table_name', 'asc')
+
+}
+
+async function readReservation(reservation_id) {
+
+    const reservation = await knex("reservations").select("*").where({ reservation_id })
+
+    return reservation
+
+}
+
+async function readTable(table_id) {
+
+    const table = await knex("tables").select("*").where({ table_id })
+    return table
+}
+
+async function update(reservation_id, table_id) {
+    const updated = await knex("tables").update({ reservation_id }).where({ table_id }).returning("*")
+
+    return updated
+}
 module.exports = {
-    create
+    create,
+    list,
+    readReservation,
+    readTable,
+    update
+
 }

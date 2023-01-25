@@ -7,6 +7,7 @@ import { next, today, previous } from "../utils/date-time";
 import ReservationCards from "./ReservationCards";
 import ToggleButtons from "./ToggleButtons";
 import Loader from "../Loader";
+import TableSeats from "../tables/TableSeats";
 /**
  * Defines the dashboard page.
  * @param date
@@ -24,11 +25,15 @@ function Dashboard() {
   const [changeDate, setChangeDate] = useState(reservationDate)
   const [notAvailable, setNotAvailable] = useState("")
 
+  const [tables, setTables] = useState([])
+  const [tablesError, setTablesError] = useState(null)
+
   useEffect(loadDashboard, []);
 
   useEffect(loadChangeDate, [changeDate])
 
 
+  useEffect(loadTables, [])
 
   async function loadDashboard() {
     const abortController = new AbortController();
@@ -53,6 +58,34 @@ function Dashboard() {
 
     return () => abortController.abort();
   }
+
+
+  async function loadTables() {
+    const abortController = new AbortController();
+    setTablesError(null)
+    try {
+
+      const retrievedTables = await fetch("http://localhost:5001/tables", { signal: abortController.signal } // Pass the `AbortController` signal to `fetch()`
+      )
+      const { data, error } = await retrievedTables.json()
+
+
+      if (error) {
+        throw error
+      } else if (data.length === 0) {
+        throw "no table available at this moment"
+      }
+      setTables((tables) => tables.concat(data))
+
+    } catch (error) {
+      setTablesError(error)
+    }
+
+    return () => abortController.abort();
+
+  }
+
+
 
   async function loadChangeDate() {
     const abortController = new AbortController();
@@ -123,6 +156,10 @@ function Dashboard() {
           handleTodayDate={handleTodayDate} />
       </div>
 
+      <TableSeats tables={tables} />
+      <div>
+
+      </div>
     </main>
   );
 }

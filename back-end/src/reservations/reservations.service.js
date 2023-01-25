@@ -7,6 +7,13 @@ async function create(reservation) {
 }
 
 
+
+async function read(reservation_id) {
+
+    const reservation = await db("reservations").select("*").where({ reservation_id }).first()
+    return reservation
+}
+
 async function list(date) {
     console.log('reservationfsdfsf', date)
 
@@ -18,5 +25,6 @@ async function list(date) {
 }
 module.exports = {
     create,
-    list
+    list,
+    read
 }

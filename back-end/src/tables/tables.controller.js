@@ -1,19 +1,89 @@
 const asyncErrorBoundary = require("../errors/asyncErrorBound")
 const service = require("./tables.service")
+
 function dataExists(req, res, next) {
     const { data } = req.body
     if (!data) {
         return next({
-            status: 400,
-            message: ""
+            status: 400
         })
     }
-
-    console.log('data')
+    console.log('ggggg')
     next()
 }
 
-function tableExists(req, res, next) {
+
+function reservationIdExists(req, res, next) {
+
+    const { data: { reservation_id } = {} } = req.body
+
+    if (reservation_id) {
+        return next()
+    }
+    next({
+        status: 400,
+        message: "reservation_id does not exist"
+    })
+
+}
+
+async function reservationExists(req, res, next) {
+
+    const { data: { reservation_id } = {} } = req.body
+
+    const reservation = await service.readReservation(Number(reservation_id))
+    // console.log('reee', reservation)
+    if (reservation.length === 0) {
+        return next({
+            status: 404,
+            message: `no reservation was found for ${reservation_id}`
+        })
+    }
+    next()
+
+}
+
+
+async function sufficientCapacity(req, res, next) {
+    const { data: { reservation_id } = {} } = req.body
+
+    const { table_id } = req.params
+
+    const [{ capacity }] = await service.readTable(Number(table_id))
+    const [{ people }] = await service.readReservation(Number(reservation_id))
+    if (people <= capacity) {
+        return next()
+    }
+    next({
+        status: 400,
+        message: "there is not enough capacity"
+    })
+
+}
+
+async function tableOccupied(req, res, next) {
+
+    // const { data: { reservation_id } = {} } = req.body
+
+    const { table_id } = req.params
+
+    const [{ reservation_id }] = await service.readTable(Number(table_id))
+    if (reservation_id) {
+        next({
+            status: 400,
+            message: "the table is occupied, there is not a seat"
+        })
+    }
+
+    next()
+    // const [{ people }] = await service.readReservation(Number(reservation_id))
+
+}
+
+
+
+
+function tableNameExists(req, res, next) {
 
     const { data: { table_name } = {} } = req.body
 
@@ -53,6 +123,16 @@ function capacity(req, res, next) {
 
 }
 
+async function list(req, res) {
+
+    const tables = await service.list()
+
+    res.status(200).json({
+        data: tables
+    })
+
+}
+
 async function create(req, res) {
 
     const table = await service.create(req.body.data)
@@ -65,6 +145,21 @@ async function create(req, res) {
 
 
 
+async function update(req, res) {
+    const { data: { reservation_id } = {} } = req.body
+    const { table_id } = req.params
+    const updated = await service.update(reservation_id, table_id)
+
+
+    res.status(200).json({
+        data: updated
+    })
+
+}
+
 module.exports = {
-    create: [dataExists, tableExists, capacity, asyncErrorBoundary(create)]
+    create: [dataExists, tableNameExists, capacity, asyncErrorBoundary(create)],
+    list: asyncErrorBoundary(list),
+    update: [dataExists, reservationIdExists, asyncErrorBoundary(reservationExists), asyncErrorBoundary(sufficientCapacity)
+        , asyncErrorBoundary(tableOccupied), update]
 }

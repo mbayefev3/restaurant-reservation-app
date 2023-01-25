@@ -18,30 +18,36 @@ async function list(req, res) {
 }
 
 
-// function validTimes(req, res, next) {
 
-//   const { data: { reservation_time } = {} } = req.body
+async function reservationExists(req, res, next) {
 
-//   const openTime = moment("10:30", "HH:mm")
-//   const beforeClosedTime = moment("21:30", "HH:mm")
-//   const reservationTime = moment(reservation_time, "HH:mm")
+  const { reservation_id } = req.params
+  const reservation = await service.read(Number(reservation_id))
+  if (reservation) {
+    res.locals.reservation = reservation
+    return next()
+  }
 
-//   const reservedBeforeOpen = reservationTime.isBefore(openTime)
-//   const reservedWhenOpen = reservationTime.isAfter(beforeClosedTime)
-//   const validReservationTime = reservationTime.isBetween(openTime, beforeClosedTime)
+  next({
+    status: 404,
+    message: `no reservation was found by the reservation_id ${reservation_id}`
+  })
 
-//   if (!validReservationTime) {
-//     return next({
-//       status: 400,
-//       message: "please choose a different time between 10H31am to 9:29pm"
-//     })
 
-//     next()
-//   }
+}
 
 
 
-// }
+function read(req, res) {
+
+  const { reservation } = res.locals
+
+  res.status(200).json({
+    data: reservation
+  })
+}
+
+
 function dataExists(req, res, next) {
 
   const { data } = req.body
@@ -284,5 +290,6 @@ async function create(req, res) {
 
 module.exports = {
   list: asyncErrorBoundary(list),
-  create: [dataExists, FirstNameExists, lastNameExists, mobilePhoneExists, validTimes, reservationDateExists, validDays, reservationTimeExists, peopleExists, asyncErrorBoundary(create)]
+  create: [dataExists, FirstNameExists, lastNameExists, mobilePhoneExists, validTimes, reservationDateExists, validDays, reservationTimeExists, peopleExists, asyncErrorBoundary(create)],
+  read: [asyncErrorBoundary(reservationExists), read]
 };
