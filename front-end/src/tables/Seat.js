@@ -79,6 +79,31 @@ function Seat() {
         setTableOption(target.value)
     }
 
+
+
+
+
+
+    // async function handleRemoveTable(table_id) {
+
+    //     const loadData = await fetch(`/tables/${table_id}/seat`, {
+
+    //         method: 'DELETE',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         }
+
+    //     })
+
+
+
+    //     const { data } = await loadTables()
+
+    //     console.log('table', data)
+    // }
+
+
+
     async function handleSubmit(e) {
 
         e.preventDefault()
@@ -102,6 +127,9 @@ function Seat() {
         // // } else {
 
         // // }
+
+
+
 
 
         try {
@@ -140,13 +168,16 @@ function Seat() {
 
         <div>
             <form onSubmit={handleSubmit}>
-                <Table tables={tables} handleChange={handleChange} tableOption={tableOption} />
+                <Table tables={tables}
+
+
+                    handleChange={handleChange} tableOption={tableOption} />
                 {/* <button type="submit">Submit</button> */}
                 <input type="submit" value="Submit" />
 
 
             </form>
-            <input type="submit" value="Submit" onClick={() => history.goBack()} />
+            <input type="submit" value="cancel" onClick={() => history.goBack()} />
 
             {/* <button type="button" className="btn btn-primary" onClick={() => history.goBack()}>Cancel</button> */}
 

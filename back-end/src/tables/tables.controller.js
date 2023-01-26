@@ -157,9 +157,54 @@ async function update(req, res) {
 
 }
 
+
+
+
+async function tableExists(req, res, next) {
+
+    const { table_id } = req.params
+
+    const table = await service.readTable(table_id)
+
+    if (table.length) {
+        return next()
+    }
+    next({
+        status: 404,
+        message: `The table ${table_id} is no existent`
+    })
+
+}
+
+
+async function isTableOccupied(req, res, next) {
+    const { table_id } = req.params
+
+    const [{ reservation_id }] = await service.readTable(Number(table_id))
+
+    if (!reservation_id) {
+        return next({
+            status: 400,
+            message: `the table ${table_id} is not occupied`
+        })
+    }
+    else if (reservation_id) {
+        const tables = await service.removeTableFromReservation(Number(table_id))
+        res.json({
+            data: tables
+        })
+    }
+
+}
+
+
+
+
+
 module.exports = {
     create: [dataExists, tableNameExists, capacity, asyncErrorBoundary(create)],
     list: asyncErrorBoundary(list),
     update: [dataExists, reservationIdExists, asyncErrorBoundary(reservationExists), asyncErrorBoundary(sufficientCapacity)
-        , asyncErrorBoundary(tableOccupied), update]
+        , asyncErrorBoundary(tableOccupied), update],
+    delete: [asyncErrorBoundary(tableExists), asyncErrorBoundary(isTableOccupied)]
 }

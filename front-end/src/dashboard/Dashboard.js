@@ -75,7 +75,7 @@ function Dashboard() {
       } else if (data.length === 0) {
         throw "no table available at this moment"
       }
-      setTables((tables) => tables.concat(data))
+      setTables(data)
 
     } catch (error) {
       setTablesError(error)
@@ -132,9 +132,47 @@ function Dashboard() {
     setChangeDate((changeDate) => previous(changeDate))
   }
 
+  async function handleRemoveTable(table_id) {
+
+    const answer = await fetch(`http://localhost:5001/tables/${table_id}/seat`, {
+
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+
+    })
 
 
+    // const { data } = await answer.json()
 
+    // setTables(data)
+    // load()
+
+    // const { data } = await loadData.json()
+
+    // setTables(data)
+    // // console.log('table', data)
+
+
+    const answerr = await fetch("http://localhost:5001/tables")
+    const { data } = await answerr.json()
+
+    console.log('data', data)
+    setTables(data)
+  }
+
+
+  async function load() {
+
+    // console.log('gg')
+
+    const answer = await fetch("http://localhost:5001/tables")
+    const { data } = await answer.json()
+
+    // console.log('data', data)
+    setTables(data)
+  }
 
 
   return (
@@ -156,7 +194,7 @@ function Dashboard() {
           handleTodayDate={handleTodayDate} />
       </div>
 
-      <TableSeats tables={tables} />
+      <TableSeats tables={tables} handleRemoveTable={handleRemoveTable} load={load} />
       <div>
 
       </div>
