@@ -14,6 +14,14 @@ exports.up = function (knex) {
 };
 
 
+
+// why the puppeter test fails and pass sometimes
+// in case i enter a data field that does not exists on the primary key what would happened?
+
+
+
+
+
 exports.down = function (knex) {
   return knex.schema.dropTable("reservations");
 };

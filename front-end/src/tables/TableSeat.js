@@ -9,11 +9,10 @@ function TableSeat({ table_name, capacity, reservation_id, table_id, handleRemov
     const history = useHistory()
 
 
-    function Modal(table_id, handleRemoveTable) {
+    function Modal() {
         if (window.confirm("Is this table ready to seat new guests? This cannot be undone.")) {
             handleRemoveTable(table_id)
-            load()
-            // history.push(`/dashboard/?table_id=${table_id}`)
+            // load()
         }
     }
 
@@ -29,7 +28,7 @@ function TableSeat({ table_name, capacity, reservation_id, table_id, handleRemov
                     data-table-id-status={table_id}
 
                 >{reservation_id ? "occupied" : "free"}</li>
-                <li>  {reservation_id ? <button data-table-id-finish={table_id} onClick={() => Modal(table_id, handleRemoveTable)}>Finish</button> : ""}
+                <li>  {reservation_id ? <button type="button" data-table-id-finish={table_id} onClick={() => Modal()}>Finish</button> : ""}
                 </li>
             </ul>
         </>

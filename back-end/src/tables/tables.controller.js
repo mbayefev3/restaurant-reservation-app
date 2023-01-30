@@ -123,6 +123,15 @@ function capacity(req, res, next) {
 
 }
 
+
+
+
+
+
+
+
+
+
 async function list(req, res) {
 
     const tables = await service.list()
@@ -145,11 +154,39 @@ async function create(req, res) {
 
 
 
+async function seatedExists(req, res, next) {
+
+    const [{ status }] = await service.readReservation(Number(req.body.data.reservation_id))
+
+    if (status === "seated") {
+        return next({
+            status: 400,
+            message: `the table is seated`
+        })
+    }
+    next()
+}
+
+
+async function changeStatusSeated(req, res, next) {
+
+    // const { data: { reservation_id } = {} } = req.body
+    // const { table_id } = req.params
+
+    await service.changeTableStatus(Number(req.params.table_id), "seated")
+    next()
+
+}
+
+
+
 async function update(req, res) {
     const { data: { reservation_id } = {} } = req.body
     const { table_id } = req.params
     const updated = await service.update(reservation_id, table_id)
 
+
+    console.log("updateddd", updated)
 
     res.status(200).json({
         data: updated
@@ -195,16 +232,36 @@ async function isTableOccupied(req, res, next) {
         })
     }
 
+
+
+}
+
+
+async function changeStatus(req, res, next) {
+    const status = await service.changeTableStatus(Number(req.params.table_id), "finished")
+
+    // console.log("stau", status)
+    // res.locals.status = status
+    next()
 }
 
 
 
 
 
+
+async function seated(req, res, next) {
+    const { data: { reservation_id } = {} } = req.body
+    await service.seated(Number(reservation_id))
+    next()
+}
+
+
 module.exports = {
     create: [dataExists, tableNameExists, capacity, asyncErrorBoundary(create)],
     list: asyncErrorBoundary(list),
     update: [dataExists, reservationIdExists, asyncErrorBoundary(reservationExists), asyncErrorBoundary(sufficientCapacity)
-        , asyncErrorBoundary(tableOccupied), update],
-    delete: [asyncErrorBoundary(tableExists), asyncErrorBoundary(isTableOccupied)]
+        , asyncErrorBoundary(tableOccupied), asyncErrorBoundary(seatedExists), asyncErrorBoundary(seated), update],
+    delete: [asyncErrorBoundary(tableExists), asyncErrorBoundary(changeStatus), asyncErrorBoundary(isTableOccupied)
+    ]
 }

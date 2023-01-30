@@ -45,12 +45,83 @@ async function removeTableFromReservation(table_id) {
     return tables
 }
 
+
+
+// async function changeStatus(table_id) {
+
+
+//     try {
+//         await knex.transaction(async trx => {
+
+
+//             const [{ reservation_id }] = await knex('tables as t').join("reservations as r", "t.reservation_id", "r.reservation_id").where({ "t.table_id": table_id }).select("r.reservation_id")
+
+
+//             const updated = await trx("reservations").update({ status: "seated" }).where({ reservation_id }).returning("*")
+
+
+//             // console.log("updateddddd", updated)
+//             return updated
+//         })
+//     } catch (error) {
+//         // If we get here, that means that neither the 'Old Books' catalogues insert,
+//         // nor any of the books inserts will have taken place.
+//         // return []
+//         console.error(error);
+//     }
+// }
+
+
+
+
+async function changeTableStatus(table_id, status) {
+
+
+
+
+    try {
+        await knex.transaction(async trx => {
+
+
+            const [{ reservation_id }] = await knex('tables as t').join("reservations as r", "t.reservation_id", "r.reservation_id").where({ "t.table_id": table_id }).select("r.reservation_id")
+
+
+            const updated = await trx("reservations").update({ status }).where({ reservation_id }).returning("*")
+
+
+            // console.log("updateddddd", updated)
+            return updated
+        })
+    } catch (error) {
+        // If we get here, that means that neither the 'Old Books' catalogues insert,
+        // nor any of the books inserts will have taken place.
+        // return []
+        console.error(error);
+    }
+
+}
+
+
+async function seated(reservation_id) {
+    const answer = await knex("reservations").update({ status: "seated" }).where({ reservation_id }).returning("*")
+
+    console.log("asdsadasdasdsadddddddddd", answer)
+    return answer
+
+}
+
+
+
+
 module.exports = {
     create,
     list,
     readReservation,
     readTable,
     update,
-    removeTableFromReservation
+    removeTableFromReservation,
+    changeTableStatus,
+    seated
+    // changeStatus
 
 }

@@ -9,7 +9,8 @@ const ReservationCards = ({ reservations }) => {
         <div>
 
             {
-                reservations.map((reservation) => <ReservationCard key={reservation.reservation_id} reservation={reservation} />)
+                reservations.map((reservation) => <ReservationCard key={reservation.reservation_id} reservation={reservation}
+                />)
             }
         </div>
     )

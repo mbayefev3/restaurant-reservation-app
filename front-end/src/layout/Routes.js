@@ -32,6 +32,9 @@ function Routes() {
       <Route path="/dashboard">
         <Dashboard />
       </Route>
+      <Route path="/tables" exact>
+        <Dashboard />
+      </Route>
       <Route path="/tables/new" exact>
         <CreateTable />
       </Route>

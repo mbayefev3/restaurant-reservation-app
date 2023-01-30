@@ -117,6 +117,9 @@ function Dashboard() {
 
 
 
+  function handleReservationChange() {
+
+  }
 
   function handleNextDate() {
     setChangeDate((changeDate) => next(changeDate))

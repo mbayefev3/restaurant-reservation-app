@@ -10,8 +10,9 @@ async function list(req, res) {
   const { date: defaultDate, reservationDate } = req.query
 
   const searchByDate = defaultDate || reservationDate
-  const reservations = await service.list(searchByDate)
+  let reservations = await service.list(searchByDate)
 
+  reservations = reservations.filter(({ status }) => status !== "finished")
   res.json({
     data: reservations,
   });
@@ -37,10 +38,31 @@ async function reservationExists(req, res, next) {
 }
 
 
+// async function seated(req,res,next) {
+
+//   const { reservation_id } = req.params
+//   const reservation = await service.read(Number(reservation_id))
+
+//   if (reservation.status === "seated") {
+//     next({
+//       status: 400,
+//       message: "this reservation is already seated"
+//     })
+//   }
+
+//   next()
+
+// }
+
 
 function read(req, res) {
 
   const { reservation } = res.locals
+
+  if (reservation.status === "finished") {
+
+    console.log("finished", reservation)
+  }
 
   res.status(200).json({
     data: reservation
@@ -261,6 +283,113 @@ function validTimes(req, res, next) {
 
 
 
+
+function statusUnknownExists(req, res, next) {
+
+  const { data: { status } = {} } = req.body
+
+  if (status === "unknown") {
+
+    return next({
+      status: 400,
+      message: `the status cannot be ${status}`
+    })
+
+  }
+
+  next()
+}
+
+async function statusFinishExists(req, res, next) {
+
+  const { reservation_id } = req.params
+  const status = await service.finishExists(Number(reservation_id))
+  if (status === "finished") {
+
+    return next({
+      status: 400,
+      message: `the status cannot be ${status}`
+    })
+
+  }
+
+  next()
+
+}
+
+function StatusExists(req, res, next) {
+
+  const { data: { status } = {} } = req.body
+
+  if (!status) {
+    return next({
+      status: 400,
+      message: "data does not have property status"
+    })
+  }
+
+  next()
+}
+
+
+async function updateReservationStatus(req, res, next) {
+
+  const { reservation_id } = req.params
+  const { data: { status } = {} } = req.body
+
+  const availableStatus = ["booked", "seated", "finished"]
+
+  if (availableStatus.includes(status)) {
+    await service.update(status, Number(reservation_id))
+
+    return res.status(200).json({
+      data: { status }
+    })
+
+
+  }
+
+  next({
+    status: 400,
+    message: `this status ${status} not available`
+  })
+
+
+  // console.log("statussss", status)
+
+}
+
+
+function seatedExists(req, res, next) {
+
+  const { data: { status } = {} } = req.body
+
+  if (status === "seated") {
+    return next({
+      status: 400,
+      message: `cannot be of a status ${status}`
+    })
+  }
+  next()
+}
+
+
+function finishedExists(req, res, next) {
+  const { data: { status } = {} } = req.body
+
+
+  if (status === "finished") {
+    return next({
+      status: 400,
+      message: `cannot be of a status ${status}`
+    })
+  }
+  next()
+
+}
+
+
+
 async function create(req, res) {
 
   const { data: { mobile_number } = {} } = req.body
@@ -290,6 +419,8 @@ async function create(req, res) {
 
 module.exports = {
   list: asyncErrorBoundary(list),
-  create: [dataExists, FirstNameExists, lastNameExists, mobilePhoneExists, validTimes, reservationDateExists, validDays, reservationTimeExists, peopleExists, asyncErrorBoundary(create)],
-  read: [asyncErrorBoundary(reservationExists), read]
+  create: [dataExists, FirstNameExists, lastNameExists, mobilePhoneExists, validTimes, reservationDateExists, validDays, reservationTimeExists, peopleExists, seatedExists, finishedExists, asyncErrorBoundary(create)],
+  read: [asyncErrorBoundary(reservationExists), //asyncErrorBoundary(seated), 
+    read],
+  update: [dataExists, StatusExists, asyncErrorBoundary(reservationExists), statusUnknownExists, statusFinishExists, asyncErrorBoundary(updateReservationStatus)]
 };
